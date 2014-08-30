@@ -6,19 +6,28 @@ type Object3d struct {
 	name     string
 	parent   *Object3d
 	children []*Object3d
+	position *Vector3
+	rotation *EulerAngles
 }
 
-func MakeObject3d(name string) *Object3d {
-	return &Object3d{name: name}
+func MakeObject3d(name string, position *Vector3, rotation *EulerAngles) *Object3d {
+	return &Object3d{
+		name:     name,
+		position: position,
+		rotation: rotation,
+	}
 }
 
 func (obj *Object3d) String() string {
 	return obj.name
 }
 
-// Parent returns the parent of an object.
-func (obj *Object3d) Parent() *Object3d {
-	return obj.parent
+func (obj *Object3d) Position() *Vector3 {
+	return obj.position
+}
+
+func (obj *Object3d) Rotation() *EulerAngles {
+	return obj.rotation
 }
 
 // Add appends a child object, and updates the child's parent.

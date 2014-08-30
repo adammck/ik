@@ -5,19 +5,28 @@ import (
 )
 
 func TestMakeObject3d(t *testing.T) {
-	o3d := MakeObject3d("a")
-	act := o3d.String()
-	exp := "a"
+	name := "AAA"
+	pos := &Vector3{1, 2, 3}
+	rot := &EulerAngles{90, 180, 270}
+	o := MakeObject3d("AAA", pos, rot)
 
-	if act != exp {
-		t.Errorf("o3d.String() returned %#v, expected %#v", act, exp)
+	if o.String() != name {
+		t.Errorf("o.String() returned %v, expected %v", o.String(), name)
+	}
+
+	if o.Position() != pos {
+		t.Errorf("o.Position() returned %v, expected %v", o.Position(), pos)
+	}
+
+	if o.Rotation() != rot {
+		t.Errorf("o.Rotation() returned %v, expected %v", o.Rotation(), rot)
 	}
 }
 
 func TestAdd(t *testing.T) {
-	a := MakeObject3d("a")
-	b := MakeObject3d("b")
-	c := MakeObject3d("c")
+	a := &Object3d{name: "a"}
+	b := &Object3d{name: "b"}
+	c := &Object3d{name: "c"}
 
 	// a <- b
 
@@ -75,8 +84,8 @@ func TestAdd(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	a := MakeObject3d("a")
-	b := MakeObject3d("b")
+	a := &Object3d{name: "a"}
+	b := &Object3d{name: "b"}
 	a.Add(b)
 
 	err := a.Remove(b)
