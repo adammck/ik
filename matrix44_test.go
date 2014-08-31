@@ -1,4 +1,4 @@
-package three
+package math3d
 
 import (
   "testing"
