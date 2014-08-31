@@ -13,5 +13,13 @@ func MakeVector3(x float64, y float64, z float64) *Vector3 {
 }
 
 func (v *Vector3) String() string {
-	return fmt.Sprintf("&Vec3{x=%g y=%g z=%g}", v.X, v.Y, v.Z)
+	return fmt.Sprintf("&Vec3{x=%0.2f y=%0.2f z=%0.2f}", v.X, v.Y, v.Z)
+}
+
+func (v *Vector3) MultiplyByMatrix44(m *Matrix44) *Vector3 {
+  return &Vector3{
+    (v.X * m.m11) + (v.Y * m.m21) + (v.Z * m.m31) + m.m41,
+    (v.X * m.m12) + (v.Y * m.m22) + (v.Z * m.m32) + m.m42,
+    (v.X * m.m13) + (v.Y * m.m23) + (v.Z * m.m33) + m.m43,
+  }
 }

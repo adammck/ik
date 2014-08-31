@@ -5,14 +5,9 @@ import (
 )
 
 func TestMakeObject3d(t *testing.T) {
-	name := "AAA"
 	pos := &Vector3{1, 2, 3}
 	rot := &EulerAngles{90, 180, 270}
 	o := MakeObject3d("AAA", pos, rot)
-
-	if o.String() != name {
-		t.Errorf("o.String() returned %v, expected %v", o.String(), name)
-	}
 
 	if o.Position() != pos {
 		t.Errorf("o.Position() returned %v, expected %v", o.Position(), pos)

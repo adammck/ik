@@ -13,5 +13,5 @@ func MakeEulerAngles(h float64, p float64, b float64) *EulerAngles {
 }
 
 func (ea *EulerAngles) String() string {
-	return fmt.Sprintf("&Euler{h=%g p=%g b=%g}", ea.Heading, ea.Pitch, ea.Bank)
+	return fmt.Sprintf("&Euler{h=%.2f p=%.2f b=%.2f}", ea.Heading, ea.Pitch, ea.Bank)
 }

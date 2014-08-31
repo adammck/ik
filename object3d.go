@@ -8,6 +8,7 @@ type Object3d struct {
 	children []*Object3d
 	position *Vector3
 	rotation *EulerAngles
+	//matrix   *Matrix4
 }
 
 func MakeObject3d(name string, position *Vector3, rotation *EulerAngles) *Object3d {
@@ -19,7 +20,7 @@ func MakeObject3d(name string, position *Vector3, rotation *EulerAngles) *Object
 }
 
 func (obj *Object3d) String() string {
-	return obj.name
+	return fmt.Sprintf("&Obj{%s pos=%s, rot=%s}", obj.name, obj.position, obj.rotation)
 }
 
 func (obj *Object3d) Position() *Vector3 {
@@ -28,6 +29,34 @@ func (obj *Object3d) Position() *Vector3 {
 
 func (obj *Object3d) Rotation() *EulerAngles {
 	return obj.rotation
+}
+
+// Matrix returns a Matrix4 to convert a vector in this object's coordinate
+// space to that of its parent's space.
+func (obj *Object3d) Matrix() *Matrix44 {
+	return MakeMatrix44(obj.position, obj.rotation)
+}
+
+// WorldMatrix returns a Matrix4 which can be applied to a vector in the
+// Object's coordinate space to convert it to the global space.
+func (obj *Object3d) WorldMatrix() *Matrix44 {
+	if obj.parent != nil {
+		m := obj.parent.WorldMatrix()
+		m.Multiply(obj.Matrix())
+		return m
+	} else {
+		return obj.Matrix()
+	}
+}
+
+func (obj *Object3d) WorldPosition() *Vector3 {
+	var p *Vector3
+	if obj.parent != nil {
+		p = obj.parent.position
+	} else {
+		p = &Vector3{}
+	}
+	return p.MultiplyByMatrix44(obj.WorldMatrix())
 }
 
 // Add appends a child object, and updates the child's parent.
