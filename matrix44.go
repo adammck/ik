@@ -2,6 +2,7 @@ package math3d
 
 import (
 	"math"
+	"fmt"
 )
 
 type Matrix44 struct {
@@ -28,6 +29,15 @@ func MakeMatrix44(v *Vector3, ea *EulerAngles) *Matrix44 {
 	m.SetRotation(ea)
 	m.SetTranslation(v)
 	return m
+}
+
+func (m *Matrix44) String() string {
+	return fmt.Sprintf(
+		"&M44{%+.4f %+.4f %+.4f %+.4f | %+.4f %+.4f %+.4f %+.4f | %+.4f %+.4f %+.4f %+.4f | %+.4f %+.4f %+.4f %+.4f}",
+		m.m11, m.m12, m.m13, m.m14,
+		m.m21, m.m22, m.m23, m.m24,
+		m.m31, m.m32, m.m33, m.m34,
+		m.m41, m.m42, m.m43, m.m44)
 }
 
 // Array returns the matrix as a 4D array of float64s. This is pretty much only
