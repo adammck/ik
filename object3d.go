@@ -40,23 +40,23 @@ func (obj *Object3d) Matrix() *Matrix44 {
 // WorldMatrix returns a Matrix4 which can be applied to a vector in the
 // Object's coordinate space to convert it to the global space.
 func (obj *Object3d) WorldMatrix() *Matrix44 {
+	m := obj.Matrix()
+
 	if obj.parent != nil {
-		m := obj.parent.WorldMatrix()
-		m.Multiply(obj.Matrix())
-		return m
-	} else {
-		return obj.Matrix()
+		m.Multiply(obj.parent.WorldMatrix())
 	}
+
+	return m
 }
 
 func (obj *Object3d) WorldPosition() *Vector3 {
-	var p *Vector3
+	p := obj.position
+
 	if obj.parent != nil {
-		p = obj.parent.position
-	} else {
-		p = &Vector3{}
+		p = p.MultiplyByMatrix44(obj.parent.WorldMatrix())
 	}
-	return p.MultiplyByMatrix44(obj.WorldMatrix())
+
+	return p
 }
 
 // Add appends a child object, and updates the child's parent.
