@@ -43,7 +43,7 @@ func (obj *Object3d) WorldMatrix() *Matrix44 {
 	m := obj.Matrix()
 
 	if obj.parent != nil {
-		m.Multiply(obj.parent.WorldMatrix())
+		return MultiplyMatrices(m, obj.parent.WorldMatrix())
 	}
 
 	return m
