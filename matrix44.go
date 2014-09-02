@@ -1,8 +1,8 @@
 package math3d
 
 import (
-	"math"
 	"fmt"
+	"math"
 )
 
 type Matrix44 struct {
@@ -92,12 +92,12 @@ func (m *Matrix44) SetRotation(ea *EulerAngles) {
 	m.m21 = -cy * sz
 	m.m31 = sy
 	m.m14 = 0
-	m.m12 = (cx * sz) + (sx * cz) * sy
-	m.m22 = (cx * cz) - (sx * sz) * sy
+	m.m12 = (cx * sz) + ((sx * cz) * sy)
+	m.m22 = (cx * cz) - ((sx * sz) * sy)
 	m.m32 = -sx * cy
 	m.m24 = 0
-	m.m13 = (sx * sz) - (cx * cz) * sy
-	m.m23 = (sx * cz) + (cx * sz) * sy
+	m.m13 = (sx * sz) - ((cx * cz) * sy)
+	m.m23 = (sx * cz) + ((cx * sz) * sy)
 	m.m33 = cx * cy
 	m.m34 = 0
 	m.m43 = 0
