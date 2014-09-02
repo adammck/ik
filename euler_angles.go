@@ -3,10 +3,14 @@ package math3d
 import "fmt"
 
 type EulerAngles struct {
-	Heading float64 // heading
-	Pitch   float64 // pitch
-	Bank    float64 // bank
+	Heading float64 // x
+	Pitch   float64 // y
+	Bank    float64 // z
 }
+
+var (
+	IdentityOrientation = &EulerAngles{}
+)
 
 func MakeEulerAngles(h float64, p float64, b float64) *EulerAngles {
 	return &EulerAngles{h, p, b}

@@ -1,6 +1,9 @@
 package math3d
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 type Object3d struct {
 	name     string
@@ -9,6 +12,10 @@ type Object3d struct {
 	position *Vector3
 	rotation *EulerAngles
 	//matrix   *Matrix4
+
+	dir   Axis
+	start float64
+	end   float64
 }
 
 func MakeObject3d(name string, position *Vector3, rotation *EulerAngles) *Object3d {
@@ -19,16 +26,53 @@ func MakeObject3d(name string, position *Vector3, rotation *EulerAngles) *Object
 	}
 }
 
+func (obj *Object3d) SetRange(dir Axis, start float64, end float64) {
+	obj.dir = dir
+	obj.start = start
+	obj.end = end
+}
+
+func (obj *Object3d) Range(s float64) []*EulerAngles {
+	a := math.Min(obj.start, obj.end)
+	b := math.Max(obj.start, obj.end)
+	ea := make([]*EulerAngles, 0)
+
+	for i := a; i <= b; i += s {
+		ea = append(ea, MakeEulerAngles(0, 0, i))
+	}
+
+	return ea
+}
+
 func (obj *Object3d) String() string {
-	return fmt.Sprintf("&Obj{%s pos=%s, rot=%s}", obj.name, obj.position, obj.rotation)
+	return fmt.Sprintf(
+		"&Obj{%s pos=%s, rot=%s}",
+		obj.name, obj.position, obj.rotation)
+}
+
+func (obj *Object3d) Children() []*Object3d {
+	return obj.children
+}
+
+func (obj *Object3d) Parent() *Object3d {
+	if obj.parent != nil {
+		return obj.parent
+	} else {
+		return MakeObject3d("zero", ZeroVector3, IdentityOrientation)
+	}
 }
 
 func (obj *Object3d) Position() *Vector3 {
 	return obj.position
 }
 
+// TODO: Just expose the member
 func (obj *Object3d) Rotation() *EulerAngles {
 	return obj.rotation
+}
+
+func (obj *Object3d) SetRotation(r *EulerAngles) {
+	obj.rotation = r
 }
 
 // Matrix returns a Matrix4 to convert a vector in this object's coordinate
