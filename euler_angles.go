@@ -1,8 +1,8 @@
 package ik
 
 import (
-  "fmt"
-  "math"
+	"fmt"
+	"math"
 )
 
 type EulerAngles struct {
@@ -16,7 +16,7 @@ var (
 )
 
 func Euler(h float64, p float64, b float64) *EulerAngles {
-  return &EulerAngles{rad(h), rad(p), rad(b)}
+	return &EulerAngles{rad(h), rad(p), rad(b)}
 }
 
 // TODO: GTFO
@@ -29,5 +29,5 @@ func (ea *EulerAngles) String() string {
 }
 
 func rad(degrees float64) float64 {
-  return (math.Pi/180) * degrees
+	return (math.Pi / 180) * degrees
 }
