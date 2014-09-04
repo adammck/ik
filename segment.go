@@ -1,4 +1,4 @@
-package math3d
+package ik
 
 import (
   "math"

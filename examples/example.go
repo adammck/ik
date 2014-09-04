@@ -10,7 +10,7 @@ import (
   "image/png"
   "os"
   "math"
-  "github.com/adammck/math3d"
+  "github.com/adammck/ik"
 )
 
 type Projection struct {
@@ -40,16 +40,16 @@ func MakeProjection(cw int, ch int, ww float64, wh float64) *Projection {
 
 func main() {
 
-  target := math3d.MakeVector3(25, -10, 0)
+  target := ik.MakeVector3(25, -10, 0)
   step := (math.Pi/180) * 4.5
 
-  x := math3d.MakeRootSegment(math3d.MakeVector3(5, 0, 0))
-  a := math3d.MakeSegment(x, math3d.Euler(0, 0,  -18), math3d.Euler(0, 0, 72), math3d.MakeVector3(20, 0, 0))
-  b := math3d.MakeSegment(a, math3d.Euler(0, 0, -135), math3d.Euler(0, 0, 45), math3d.MakeVector3(10, 0, 0))
-  c := math3d.MakeSegment(b, math3d.Euler(0, 0,  -90), math3d.Euler(0, 0, 45), math3d.MakeVector3(5, 0, 0))
+  x := ik.MakeRootSegment(ik.MakeVector3(5, 0, 0))
+  a := ik.MakeSegment(x, ik.Euler(0, 0,  -18), ik.Euler(0, 0, 72), ik.MakeVector3(20, 0, 0))
+  b := ik.MakeSegment(a, ik.Euler(0, 0, -135), ik.Euler(0, 0, 45), ik.MakeVector3(10, 0, 0))
+  c := ik.MakeSegment(b, ik.Euler(0, 0,  -90), ik.Euler(0, 0, 45), ik.MakeVector3(5, 0, 0))
 
   bestDistance := math.Inf(1)
-  bestAngles := [3]math3d.EulerAngles{}
+  bestAngles := [3]ik.EulerAngles{}
   n := 0
 
   p := MakeProjection(1000, 1000, 100.0, 100.0)
@@ -68,7 +68,7 @@ func main() {
         distanceFromTarget := target.Distance(c.End())
         if bestDistance > distanceFromTarget {
           bestDistance = distanceFromTarget
-          bestAngles = [3]math3d.EulerAngles{
+          bestAngles = [3]ik.EulerAngles{
             *aea,
             *bea,
             *cea,
@@ -103,7 +103,7 @@ func (p *Projection) project(wx float64, wy float64) (float64, float64) {
 
 // drawSegment draws the specified limb on the canvas, by starting at the given
 // object, and recursing for each child.
-func (p *Projection) drawSegment(s *math3d.Segment, col color.RGBA) {
+func (p *Projection) drawSegment(s *ik.Segment, col color.RGBA) {
   a := s.Start()
   b := s.End()
   p.line(a.X, a.Y, b.X, b.Y, col)
