@@ -9,7 +9,6 @@ import (
   "image/color"
   "image/png"
   "os"
-  "math"
   "github.com/adammck/ik"
 )
 
@@ -41,47 +40,15 @@ func MakeProjection(cw int, ch int, ww float64, wh float64) *Projection {
 func main() {
 
   target := ik.MakeVector3(25, -10, 0)
-  step := (math.Pi/180) * 4.5
-
   x := ik.MakeRootSegment(ik.MakeVector3(5, 0, 0))
   a := ik.MakeSegment(x, ik.Euler(0, 0,  -18), ik.Euler(0, 0, 72), ik.MakeVector3(20, 0, 0))
   b := ik.MakeSegment(a, ik.Euler(0, 0, -135), ik.Euler(0, 0, 45), ik.MakeVector3(10, 0, 0))
   c := ik.MakeSegment(b, ik.Euler(0, 0,  -90), ik.Euler(0, 0, 45), ik.MakeVector3(5, 0, 0))
 
-  bestDistance := math.Inf(1)
-  bestAngles := [3]ik.EulerAngles{}
-  n := 0
-
   p := MakeProjection(1000, 1000, 100.0, 100.0)
   p.grid(5, 5)
 
-  // TODO: Move all this shit into Segment or some kind of Solver
-  for _, aea := range a.Range(step) {
-    for _, bea := range b.Range(step) {
-      for _, cea := range c.Range(step) {
-
-        a.SetRotation(aea)
-        b.SetRotation(bea)
-        c.SetRotation(cea)
-        n++
-
-        distanceFromTarget := target.Distance(c.End())
-        if bestDistance > distanceFromTarget {
-          bestDistance = distanceFromTarget
-          bestAngles = [3]ik.EulerAngles{
-            *aea,
-            *bea,
-            *cea,
-          }
-        }
-
-        cp := c.End()
-        p.cross(cp.X, cp.Y, grey)
-      }
-    }
-  }
-
-  fmt.Printf("checked %d positions\n",n)
+  bestDistance, bestAngles := ik.Solve(x, target)
   fmt.Printf("distance from target: %0.4f\n",bestDistance)
   fmt.Printf("segment angles: %v\n", bestAngles)
 
