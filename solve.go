@@ -2,25 +2,39 @@ package ik
 
 import (
   "math"
+  "fmt"
 )
 
 type Result struct {
   distance float64
   angles   []EulerAngles
+  segment  *Segment
 }
 
-func Solve(segment *Segment, goal *Vector3) (float64, []EulerAngles) {
+func Solve(segment *Segment, goal *Vector3, f func(f *Vector3)) (float64, *Segment) {
   best := &Result{
     math.Inf(1),
     []EulerAngles{},
+    nil,
   }
 
-  step := (math.Pi/180) * 4.5
-  innerSolve(segment, goal, step, best)
-  return best.distance, best.angles
+  step := 18.0
+  //min := 1.0
+
+  //for best.distance > min {
+    fmt.Printf("solving, step=%d\n", step)
+    innerSolve(segment, segment, goal, (math.Pi/180) * step, best, f)
+  //  step /= 2
+
+  //  if min > best.distance {
+      return best.distance, best.segment
+  //  }
+  //}
+
+  //panic("nope")
 }
 
-func innerSolve(s *Segment, goal *Vector3, step float64, best *Result) {
+func innerSolve(root *Segment, s *Segment, goal *Vector3, step float64, best *Result, f func(f *Vector3)) {
   for _, ea := range s.Range(step) {
     s.SetRotation(ea)
 
@@ -28,6 +42,8 @@ func innerSolve(s *Segment, goal *Vector3, step float64, best *Result) {
     // against the best. otherwise, keep recursing.
     if s.Child == nil {
       d := goal.Distance(s.End())
+      f(s.End())
+
       if best.distance > d {
         best.distance = d
 
@@ -43,11 +59,12 @@ func innerSolve(s *Segment, goal *Vector3, step float64, best *Result) {
           best.angles[n-1] = *ss.angle
           n--
         }
+
+        best.segment = root.Clone()
       }
 
     } else {
-      innerSolve(s.Child, goal, step, best)
+      innerSolve(root, s.Child, goal, step, best, f)
     }
   }
 }
-

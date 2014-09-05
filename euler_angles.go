@@ -19,7 +19,7 @@ func Euler(h float64, p float64, b float64) *EulerAngles {
 	return &EulerAngles{rad(h), rad(p), rad(b)}
 }
 
-// TODO: GTFO
+// TODO: GTFO?
 func MakeEulerAngles(h float64, p float64, b float64) *EulerAngles {
 	return &EulerAngles{h, p, b}
 }

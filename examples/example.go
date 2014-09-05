@@ -43,20 +43,23 @@ func main() {
   x := ik.MakeRootSegment(ik.MakeVector3(5, 0, 0))
   a := ik.MakeSegment(x, ik.Euler(0, 0,  -18), ik.Euler(0, 0, 72), ik.MakeVector3(20, 0, 0))
   b := ik.MakeSegment(a, ik.Euler(0, 0, -135), ik.Euler(0, 0, 45), ik.MakeVector3(10, 0, 0))
-  c := ik.MakeSegment(b, ik.Euler(0, 0,  -90), ik.Euler(0, 0, 45), ik.MakeVector3(5, 0, 0))
+  _ = ik.MakeSegment(b, ik.Euler(0, 0,  -90), ik.Euler(0, 0, 45), ik.MakeVector3(5, 0, 0))
 
   p := MakeProjection(1000, 1000, 100.0, 100.0)
   p.grid(5, 5)
 
-  bestDistance, bestAngles := ik.Solve(x, target)
+  bestDistance, bestSeg := ik.Solve(x, target, func(v *ik.Vector3) {
+    p.cross(v.X, v.Y, grey)
+  })
+
   fmt.Printf("distance from target: %0.4f\n",bestDistance)
-  fmt.Printf("segment angles: %v\n", bestAngles)
+  fmt.Printf("best segment: %s\n", bestSeg)
 
   // Restore the best Rotation
-  a.SetRotation(&bestAngles[0])
-  b.SetRotation(&bestAngles[1])
-  c.SetRotation(&bestAngles[2])
-  p.drawSegment(x, green)
+  // a.SetRotation(&bestAngles[0])
+  // b.SetRotation(&bestAngles[1])
+  // c.SetRotation(&bestAngles[2])
+  p.drawSegment(bestSeg, green)
 
   p.cross(target.X, target.Y, red)
   write(p.img, "image.png")

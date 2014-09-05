@@ -27,6 +27,32 @@ func MakeRootSegment(vec *Vector3) *Segment {
 	return MakeSegment(nil, IdentityOrientation, IdentityOrientation, vec)
 }
 
+func (s *Segment) Clone() *Segment {
+
+	var c *Segment
+	if s.Child != nil {
+		c = s.Child.Clone()
+	}
+
+	ss := &Segment{
+		parent:  s.parent,
+		Child:   c,
+		angle:   MakeEulerAngles(s.angle.Heading, s.angle.Pitch, s.angle.Bank),
+		eaStart: MakeEulerAngles(s.eaStart.Heading, s.eaStart.Pitch, s.eaStart.Bank),
+		eaEnd:   MakeEulerAngles(s.eaEnd.Heading, s.eaEnd.Pitch, s.eaEnd.Bank),
+		vec:     MakeVector3(s.vec.X, s.vec.Y, s.vec.Z),
+	}
+
+	if c != nil {
+		c.parent = ss
+	}
+
+	return ss
+}
+
+func (s *Segment) Focus() []*EulerAngles {
+}
+
 func (s *Segment) Range(step float64) []*EulerAngles {
 	ea := make([]*EulerAngles, 0)
 
