@@ -12,7 +12,7 @@ type Vector3 struct {
 }
 
 var (
-	ZeroVector3 = &Vector3{}
+	ZeroVector3 = Vector3{}
 )
 
 // MakeVector3 returns a pointer to a new Vector3.
@@ -35,7 +35,7 @@ func (v *Vector3) Add(vv *Vector3) *Vector3 {
 
 // Distance calculates and returns the distance between this vector and another,
 // as a float64.
-func (v *Vector3) Distance(vv *Vector3) float64 {
+func (v Vector3) Distance(vv Vector3) float64 {
 	dx := v.X - vv.X
 	dy := v.Y - vv.Y
 	dz := v.Z - vv.Z
@@ -44,8 +44,8 @@ func (v *Vector3) Distance(vv *Vector3) float64 {
 
 // MultiplyByMatrix44 returns a new Vector3, by multiplying this vector my a 4x4
 // matrix.
-func (v *Vector3) MultiplyByMatrix44(m *Matrix44) *Vector3 {
-	return &Vector3{
+func (v Vector3) MultiplyByMatrix44(m Matrix44) Vector3 {
+	return Vector3{
 		(v.X * m.m11) + (v.Y * m.m21) + (v.Z * m.m31) + m.m41,
 		(v.X * m.m12) + (v.Y * m.m22) + (v.Z * m.m32) + m.m42,
 		(v.X * m.m13) + (v.Y * m.m23) + (v.Z * m.m33) + m.m43,

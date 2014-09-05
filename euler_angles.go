@@ -12,11 +12,11 @@ type EulerAngles struct {
 }
 
 var (
-	IdentityOrientation = &EulerAngles{}
+	IdentityOrientation = EulerAngles{}
 )
 
-func Euler(h float64, p float64, b float64) *EulerAngles {
-	return &EulerAngles{rad(h), rad(p), rad(b)}
+func Euler(h float64, p float64, b float64) EulerAngles {
+	return EulerAngles{rad(h), rad(p), rad(b)}
 }
 
 // TODO: GTFO?

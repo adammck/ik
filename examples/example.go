@@ -40,15 +40,15 @@ func MakeProjection(cw int, ch int, ww float64, wh float64) *Projection {
 func main() {
 
   target := ik.MakeVector3(25, -10, 0)
-  x := ik.MakeRootSegment(ik.MakeVector3(5, 0, 0))
-  a := ik.MakeSegment(x, ik.Euler(0, 0,  -18), ik.Euler(0, 0, 72), ik.MakeVector3(20, 0, 0))
-  b := ik.MakeSegment(a, ik.Euler(0, 0, -135), ik.Euler(0, 0, 45), ik.MakeVector3(10, 0, 0))
-  _ = ik.MakeSegment(b, ik.Euler(0, 0,  -90), ik.Euler(0, 0, 45), ik.MakeVector3(5, 0, 0))
+  x := ik.MakeRootSegment(*ik.MakeVector3(5, 0, 0))
+  a := ik.MakeSegment(x, ik.Euler(0, 0,  -18), ik.Euler(0, 0, 72), *ik.MakeVector3(20, 0, 0))
+  b := ik.MakeSegment(a, ik.Euler(0, 0, -135), ik.Euler(0, 0, 45), *ik.MakeVector3(10, 0, 0))
+  _ = ik.MakeSegment(b, ik.Euler(0, 0,  -90), ik.Euler(0, 0, 45), *ik.MakeVector3(5, 0, 0))
 
   p := MakeProjection(1000, 1000, 100.0, 100.0)
   p.grid(5, 5)
 
-  bestDistance, bestSeg := ik.Solve(x, target, func(v *ik.Vector3) {
+  bestDistance, bestSeg := ik.Solve(x, target, func(v ik.Vector3) {
     p.cross(v.X, v.Y, grey)
   })
 

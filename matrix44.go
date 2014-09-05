@@ -24,7 +24,7 @@ type Matrix44 struct {
 	m44 float64 // 15
 }
 
-func MakeMatrix44(v *Vector3, ea *EulerAngles) *Matrix44 {
+func MakeMatrix44(v Vector3, ea EulerAngles) *Matrix44 {
 	m := &Matrix44{}
 	m.SetRotation(ea)
 	m.SetTranslation(v)
@@ -77,7 +77,7 @@ func MultiplyMatrices(a *Matrix44, b *Matrix44) *Matrix44 {
 // SetRotation sets the rotation of a matrix to that of the given Euler Angle.
 // TODO: Should this return a new matrix instead?
 // TODO: This is actually kind of a constructor?
-func (m *Matrix44) SetRotation(ea *EulerAngles) {
+func (m *Matrix44) SetRotation(ea EulerAngles) {
 
 	// precompute
 	cx := math.Cos(ea.Heading)
@@ -100,15 +100,15 @@ func (m *Matrix44) SetRotation(ea *EulerAngles) {
 	m.m23 = (sx * cz) + ((cx * sz) * sy)
 	m.m33 = cx * cy
 	m.m34 = 0
-	m.m43 = 0
-	m.m43 = 0
+	m.m41 = 0
+	m.m42 = 0
 	m.m43 = 0
 	m.m44 = 1
 }
 
 // SetTranslation sets the translation of a matrix by overwriting the fourth
 // row. Other cells are left alone.
-func (m *Matrix44) SetTranslation(v *Vector3) {
+func (m *Matrix44) SetTranslation(v Vector3) {
 	m.m41 = v.X
 	m.m42 = v.Y
 	m.m43 = v.Z
