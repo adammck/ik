@@ -48,10 +48,13 @@ func main() {
   p := MakeProjection(1000, 1000, 100.0, 100.0)
   p.grid(5, 5)
 
+  n := 0
   bestDistance, bestSeg := ik.Solve(x, target, func(v ik.Vector3) {
     p.cross(v.X, v.Y, grey)
+    n++
   })
 
+  fmt.Printf("tried %d configurations\n", n)
   fmt.Printf("distance from target: %0.4f\n",bestDistance)
   fmt.Printf("best segment: %s\n", bestSeg)
 
