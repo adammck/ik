@@ -2,6 +2,7 @@ package main
 
 import (
   "bufio"
+  "flag"
   "code.google.com/p/draw2d/draw2d"
   "fmt"
   "image"
@@ -37,7 +38,6 @@ const (
   Z Axis = iota
 )
 
-
 var (
   grey      = color.RGBA{0xCC, 0xCC, 0xCC, 0xFF}
   lightGrey = color.RGBA{0xEE, 0xEE, 0xEE, 0xFF}
@@ -50,9 +50,16 @@ var (
   purple    = color.RGBA{0xAA, 0,    0xAA, 0xFF}
 )
 
-func main() {
+var (
+  tx = flag.Float64("tx", 30.0, "tx")
+  ty = flag.Float64("ty", -10.0, "ty")
+  tz = flag.Float64("tz", 20.0, "tz")
+)
 
-  target := ik.MakeVector3(30, -15, 10)
+func main() {
+  flag.Parse()
+
+  target := ik.MakeVector3(*tx, *ty, *tz)
   fmt.Printf("target: %v\n", target)
 
   // The position of the object in space must be specified by two segments. The
