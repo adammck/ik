@@ -6,8 +6,8 @@ import (
 )
 
 type EulerAngles struct {
-	Heading float64 // x
-	Pitch   float64 // y
+	Heading float64 // y
+	Pitch   float64 // x
 	Bank    float64 // z
 }
 

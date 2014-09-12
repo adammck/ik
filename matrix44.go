@@ -80,10 +80,10 @@ func MultiplyMatrices(a Matrix44, b Matrix44) *Matrix44 {
 func (m *Matrix44) SetRotation(ea EulerAngles) {
 
 	// precompute
-	cx := math.Cos(ea.Heading)
-	sx := math.Sin(ea.Heading)
-	cy := math.Cos(ea.Pitch)
-	sy := math.Sin(ea.Pitch)
+	cy := math.Cos(ea.Heading)
+	sy := math.Sin(ea.Heading)
+	cx := math.Cos(ea.Pitch)
+	sx := math.Sin(ea.Pitch)
 	cz := math.Cos(ea.Bank)
 	sz := math.Sin(ea.Bank)
 
