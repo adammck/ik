@@ -21,6 +21,9 @@ func Solve(segment *Segment, goal *Vector3, accuracy float64, f func(Vector3, fl
   for {
     innerSolve(segment, segment, goal, (math.Pi/180) * step, best, f)
 
+    // TODO: Don't bother narrowing the range and increasing the resolution if
+    //       the best solution is outside of the possible range.
+
     segment = best.Segment
     step *= 0.5
 
