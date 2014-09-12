@@ -9,14 +9,13 @@ type Result struct {
   Segment  *Segment
 }
 
-func Solve(segment *Segment, goal *Vector3, f func(Vector3, float64)) *Result {
+func Solve(segment *Segment, goal *Vector3, accuracy float64, f func(Vector3, float64)) *Result {
   best := &Result{
     math.Inf(1),
     nil,
   }
 
   step := 36.0
-  min := 0.1
   n := 0
 
   for {
@@ -30,7 +29,7 @@ func Solve(segment *Segment, goal *Vector3, f func(Vector3, float64)) *Result {
     }
 
     n++
-    if min > best.Distance || n > 10 {
+    if accuracy > best.Distance || n > 10 {
       return best
     }
   }

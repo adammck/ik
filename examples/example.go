@@ -52,23 +52,27 @@ var (
 
 func main() {
 
-  target := ik.MakeVector3(30, 0, 20)
+  target := ik.MakeVector3(30, -15, 10)
   fmt.Printf("target: %v\n", target)
 
-  r1 := ik.MakeRootSegment(*ik.MakeVector3(0, 0, 0))
-  r2 := ik.MakeSegment(r1, ik.Euler(-45, 0, 0), ik.Euler(-45, 0, 0), *ik.MakeVector3(0, 0, 0))
+  // The position of the object in space must be specified by two segments. The
+  // first positions it, then the second (which is always zero-length) rotates
+  // it into the home orientation.
+  r1 := ik.MakeRootSegment(*ik.MakeVector3(10, 0, 10))
+  r2 := ik.MakeSegment(r1, ik.Euler(0, 0, 0), ik.Euler(0, 0, 0), *ik.MakeVector3(0, 0, 0)) // -60 0 0
 
-  coxa   := ik.MakeSegment(r2,    ik.Euler(45, 0,   0), ik.Euler(-45, 0,  0), *ik.MakeVector3( 5, 0, 0))
-  femur  := ik.MakeSegment(coxa,  ik.Euler(0,  0,   0), ik.Euler(  0, 0, 90), *ik.MakeVector3(10, 0, 0))
-  tibia  := ik.MakeSegment(femur, ik.Euler(0,  0, -80), ik.Euler(  0, 0, 80), *ik.MakeVector3(10, 0, 0))
-  tarsus := ik.MakeSegment(tibia, ik.Euler(0,  0,  90), ik.Euler(  0, 0, 90), *ik.MakeVector3( 5, 0, 0))
+  // Movable segments
+  coxa   := ik.MakeSegment(r2,    ik.Euler(60, 0,   0), ik.Euler(-60, 0,    0), *ik.MakeVector3( 5, -5, 0)) // 0 0 0
+  femur  := ik.MakeSegment(coxa,  ik.Euler(0,  0,  90), ik.Euler(  0, 0,    0), *ik.MakeVector3(10,  0, 0)) // 0 0 60
+  tibia  := ik.MakeSegment(femur, ik.Euler(0,  0, -45), ik.Euler(  0, 0, -135), *ik.MakeVector3(10,  0, 0)) // 0 0 -90
+  tarsus := ik.MakeSegment(tibia, ik.Euler(0,  0,   0), ik.Euler(  0, 0,  -90), *ik.MakeVector3( 5,  0, 0)) // 0 0 -60
   _ = tarsus
 
   img := image.NewRGBA(image.Rect(0, 0, 1000, 1000))
   draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
   top := &Projection{
-    label:        "Top",
+    label:        "Top (x,z)",
     horizAxis:    X,
     vertiAxis:    Z,
     offsetLeft:   0,
@@ -80,7 +84,7 @@ func main() {
   }
 
   front := &Projection{
-    label:        "Front",
+    label:        "Front (x,y)",
     horizAxis:    X,
     vertiAxis:    Y,
     offsetLeft:   0,
@@ -92,7 +96,7 @@ func main() {
   }
 
   side := &Projection{
-    label:        "Side",
+    label:        "Side (z,y)",
     horizAxis:    Z,
     vertiAxis:    Y,
     offsetLeft:   500,
@@ -108,17 +112,16 @@ func main() {
   p.drawLabels(black)
   p.drawSplits(black)
 
-  best := ik.Solve(r1, target, func(v ik.Vector3, d float64) {
+  best := ik.Solve(coxa, target, 0.1, func(v ik.Vector3, d float64) {
     p.cross(v, grey)
-    //p.drawSegment(&best, yellow)
   })
 
   fmt.Printf("\n\n\n\ndistance: %0.4f\n", best.Distance)
   fmt.Printf("segment: %s\n", best.Segment)
-
   p.drawSegment(best.Segment, red)
+
   p.cross(ik.Vector3{0, 0, 0}, blue)
-  p.cross(*target, red)
+  p.cross(*target, blue)
 
   write(p.img, "image.png")
 }
