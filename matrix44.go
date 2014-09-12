@@ -31,7 +31,7 @@ func MakeMatrix44(v Vector3, ea EulerAngles) *Matrix44 {
 	return m
 }
 
-func (m *Matrix44) String() string {
+func (m Matrix44) String() string {
 	return fmt.Sprintf(
 		"&M44{%+.4f %+.4f %+.4f %+.4f | %+.4f %+.4f %+.4f %+.4f | %+.4f %+.4f %+.4f %+.4f | %+.4f %+.4f %+.4f %+.4f}",
 		m.m11, m.m12, m.m13, m.m14,
@@ -42,7 +42,7 @@ func (m *Matrix44) String() string {
 
 // Array returns the matrix as a 4D array of float64s. This is pretty much only
 // useful for dumping its contents.
-func (m *Matrix44) Elements() [4][4]float64 {
+func (m Matrix44) Elements() [4][4]float64 {
 	return [4][4]float64{
 		[4]float64{m.m11, m.m12, m.m13, m.m14},
 		[4]float64{m.m21, m.m22, m.m23, m.m24},
@@ -53,7 +53,7 @@ func (m *Matrix44) Elements() [4][4]float64 {
 
 // MultiplyMatrices multiplies two 4x4 matrices together, and returns a pointer
 // to the result.
-func MultiplyMatrices(a *Matrix44, b *Matrix44) *Matrix44 {
+func MultiplyMatrices(a Matrix44, b Matrix44) *Matrix44 {
 	return &Matrix44{
 		(a.m11 * b.m11) + (a.m12 * b.m21) + (a.m13 * b.m31) + (a.m14 * b.m41),
 		(a.m11 * b.m12) + (a.m12 * b.m22) + (a.m13 * b.m32) + (a.m14 * b.m42),

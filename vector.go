@@ -20,12 +20,12 @@ func MakeVector3(x float64, y float64, z float64) *Vector3 {
 	return &Vector3{x, y, z}
 }
 
-func (v *Vector3) String() string {
+func (v Vector3) String() string {
 	return fmt.Sprintf("&Vec3{x=%0.2f y=%0.2f z=%0.2f}", v.X, v.Y, v.Z)
 }
 
 // Adds two vectors, and returns a pointer to the result.
-func (v *Vector3) Add(vv *Vector3) *Vector3 {
+func (v Vector3) Add(vv Vector3) *Vector3 {
 	return &Vector3{
 		(v.X + vv.X),
 		(v.Y + vv.Y),
