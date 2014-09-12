@@ -101,7 +101,7 @@ func (s *Segment) WorldMatrix() *Matrix44 {
 	// this coordinate space.
 	if s.parent != nil {
 		m := MakeMatrix44(s.parent.vec, s.angle)
-		return MultiplyMatrices(m, s.parent.WorldMatrix())
+		return MultiplyMatrices(*m, *s.parent.WorldMatrix())
 
 		// no parent means that this is a root segment, so the origin is zero, and
 		// transformations only need an angle.

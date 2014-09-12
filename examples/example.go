@@ -12,85 +12,212 @@ import (
   "github.com/adammck/ik"
 )
 
+type Axis int
+
 type Projection struct {
-  img          draw.Image
+  label        string
+  horizAxis    Axis
+  vertiAxis    Axis
+  offsetLeft   float64
+  offsetTop    float64
   canvasWidth  float64
   canvasHeight float64
   worldWidth   float64
   worldHeight  float64
 }
 
-var (
-  grey   = color.RGBA{0xCC, 0xCC, 0xCC, 0xFF}
-  black  = color.RGBA{0,    0,    0,    0xFF}
-  red    = color.RGBA{0xAA, 0,    0,    0xFF}
-  green  = color.RGBA{0,    0xAA, 0,    0xFF}
-  blue   = color.RGBA{0,    0,    0xAA, 0xFF}
-  yellow = color.RGBA{0xAA, 0xAA, 0,    0xFF}
-  cyan   = color.RGBA{0,    0xAA, 0xAA, 0xFF}
-  purple = color.RGBA{0xAA, 0,    0xAA, 0xFF}
+type ProjectionSet struct {
+  img  draw.Image
+  proj []*Projection
+}
+
+const (
+  X Axis = iota
+  Y Axis = iota
+  Z Axis = iota
 )
 
-func MakeProjection(cw int, ch int, ww float64, wh float64) *Projection {
-  img := image.NewRGBA(image.Rect(0, 0, cw, ch))
-  draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
-  return &Projection{img, float64(cw), float64(ch), ww, wh}
-}
+
+var (
+  grey      = color.RGBA{0xCC, 0xCC, 0xCC, 0xFF}
+  lightGrey = color.RGBA{0xEE, 0xEE, 0xEE, 0xFF}
+  black     = color.RGBA{0,    0,    0,    0xFF}
+  red       = color.RGBA{0xAA, 0,    0,    0xFF}
+  green     = color.RGBA{0,    0xAA, 0,    0xFF}
+  blue      = color.RGBA{0,    0,    0xAA, 0xFF}
+  yellow    = color.RGBA{0xAA, 0xAA, 0,    0xFF}
+  cyan      = color.RGBA{0,    0xAA, 0xAA, 0xFF}
+  purple    = color.RGBA{0xAA, 0,    0xAA, 0xFF}
+)
 
 func main() {
 
-  target := ik.MakeVector3(25, -10, 0)
-  x := ik.MakeRootSegment(*ik.MakeVector3(5, 0, 0))
-  a := ik.MakeSegment(x, ik.Euler(0, 0,  -18), ik.Euler(0, 0, 72), *ik.MakeVector3(20, 0, 0))
-  b := ik.MakeSegment(a, ik.Euler(0, 0, -135), ik.Euler(0, 0, 45), *ik.MakeVector3(10, 0, 0))
-  _ = ik.MakeSegment(b, ik.Euler(0, 0,  -90), ik.Euler(0, 0, 45), *ik.MakeVector3(5, 0, 0))
+  target := ik.MakeVector3(30, 0, 20)
+  fmt.Printf("target: %v\n", target)
 
-  p := MakeProjection(1000, 1000, 100.0, 100.0)
-  p.grid(5, 5)
+  r1 := ik.MakeRootSegment(*ik.MakeVector3(0, 0, 0))
+  r2 := ik.MakeSegment(r1, ik.Euler(-45, 0, 0), ik.Euler(-45, 0, 0), *ik.MakeVector3(0, 0, 0))
 
-  n := 0
-  bestDistance, bestSeg := ik.Solve(x, target, func(v ik.Vector3) {
-    p.cross(v.X, v.Y, grey)
-    n++
+  coxa   := ik.MakeSegment(r2,    ik.Euler(45, 0,   0), ik.Euler(-45, 0,  0), *ik.MakeVector3( 5, 0, 0))
+  femur  := ik.MakeSegment(coxa,  ik.Euler(0,  0,   0), ik.Euler(  0, 0, 90), *ik.MakeVector3(10, 0, 0))
+  tibia  := ik.MakeSegment(femur, ik.Euler(0,  0, -80), ik.Euler(  0, 0, 80), *ik.MakeVector3(10, 0, 0))
+  tarsus := ik.MakeSegment(tibia, ik.Euler(0,  0,  90), ik.Euler(  0, 0, 90), *ik.MakeVector3( 5, 0, 0))
+  _ = tarsus
+
+  img := image.NewRGBA(image.Rect(0, 0, 1000, 1000))
+  draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
+
+  top := &Projection{
+    label:        "Top",
+    horizAxis:    X,
+    vertiAxis:    Z,
+    offsetLeft:   0,
+    offsetTop:    0,
+    canvasWidth:  500,
+    canvasHeight: 500,
+    worldWidth:   100.0,
+    worldHeight:  100.0,
+  }
+
+  front := &Projection{
+    label:        "Front",
+    horizAxis:    X,
+    vertiAxis:    Y,
+    offsetLeft:   0,
+    offsetTop:    500,
+    canvasWidth:  500,
+    canvasHeight: 500,
+    worldWidth:   100.0,
+    worldHeight:  100.0,
+  }
+
+  side := &Projection{
+    label:        "Side",
+    horizAxis:    Z,
+    vertiAxis:    Y,
+    offsetLeft:   500,
+    offsetTop:    500,
+    canvasWidth:  500,
+    canvasHeight: 500,
+    worldWidth:   100.0,
+    worldHeight:  100.0,
+  }
+
+  p := &ProjectionSet{img, []*Projection{top, front, side}}
+  p.drawGrids(lightGrey, 5)
+  p.drawLabels(black)
+  p.drawSplits(black)
+
+  best := ik.Solve(r1, target, func(v ik.Vector3, d float64) {
+    p.cross(v, grey)
+    //p.drawSegment(&best, yellow)
   })
 
-  fmt.Printf("tried %d configurations\n", n)
-  fmt.Printf("distance from target: %0.4f\n",bestDistance)
-  fmt.Printf("best segment: %s\n", bestSeg)
+  fmt.Printf("\n\n\n\ndistance: %0.4f\n", best.Distance)
+  fmt.Printf("segment: %s\n", best.Segment)
 
-  // Restore the best Rotation
-  // a.SetRotation(&bestAngles[0])
-  // b.SetRotation(&bestAngles[1])
-  // c.SetRotation(&bestAngles[2])
-  p.drawSegment(bestSeg, green)
+  p.drawSegment(best.Segment, red)
+  p.cross(ik.Vector3{0, 0, 0}, blue)
+  p.cross(*target, red)
 
-  p.cross(target.X, target.Y, red)
   write(p.img, "image.png")
 }
 
 // Projects an (x,y) world coordinate onto the canvas, returning (x,y).
-func (p *Projection) project(wx float64, wy float64) (float64, float64) {
-  return ((wx / p.worldWidth) * p.canvasWidth) + (p.canvasWidth * 0.5),
-         ((wy / p.worldHeight) * -p.canvasHeight) + (p.canvasHeight * 0.5)
+func (p *Projection) project(v ik.Vector3) (float64, float64) {
+  var x, y float64
+
+  switch p.horizAxis {
+  case X:
+    x = v.X
+  case Y:
+    x = v.Y
+  case Z:
+    x = v.Z
+  default:
+    panic("invalid horizAxis")
+  }
+
+  switch p.vertiAxis {
+  case X:
+    y = v.X
+  case Y:
+    y = v.Y
+  case Z:
+    y = v.Z
+  default:
+    panic("invalid vertiAxis")
+  }
+
+  return p.offsetLeft + ((x / p.worldWidth) * p.canvasWidth) + (p.canvasWidth * 0.5),
+         p.offsetTop + ((y / p.worldHeight) * -p.canvasHeight) + (p.canvasHeight * 0.5)
+}
+
+
+func (ps *ProjectionSet) cross(v ik.Vector3, col color.RGBA) {
+  for _, p := range ps.proj {
+    p.cross(ps.img, v, col)
+  }
 }
 
 // drawSegment draws the specified limb on the canvas, by starting at the given
 // object, and recursing for each child.
-func (p *Projection) drawSegment(s *ik.Segment, col color.RGBA) {
-  a := s.Start()
-  b := s.End()
-  p.line(a.X, a.Y, b.X, b.Y, col)
+func (ps *ProjectionSet) drawSegment(s *ik.Segment, col color.RGBA) {
+  for _, p := range ps.proj {
+    p.drawSegment(ps.img, s, col)
+  }
+}
+
+
+func (ps *ProjectionSet) drawLabels(col color.RGBA) {
+  c := draw2d.NewGraphicContext(ps.img)
+
+  for _, p := range ps.proj {
+    draw2d.SetFontFolder("/Users/adammck/code/go/src/code.google.com/p/draw2d/resource/font")
+    c.SetFontData(draw2d.FontData{"luxi", draw2d.FontFamilySans, draw2d.FontStyleNormal})
+    c.SetFillColor(col)
+    c.SetFontSize(10)
+    c.FillStringAt(p.label, p.offsetLeft + 5, p.offsetTop + 15)
+  }
+}
+
+func (ps *ProjectionSet) drawSplits(col color.RGBA) {
+  c := draw2d.NewGraphicContext(ps.img)
+  c.SetStrokeColor(col)
+  c.SetLineWidth(2)
+
+  // Horiz
+  c.MoveTo(0, 500)
+  c.LineTo(1000, 500)
+  c.Stroke()
+
+  // Verti
+  c.MoveTo(500, 0)
+  c.LineTo(500, 1000)
+  c.Stroke()
+}
+
+func (ps *ProjectionSet) drawGrids(col color.RGBA, interval float64) {
+  for _, p := range ps.proj {
+    p.grid(ps.img, interval, col)
+  }
+}
+
+
+func (p *Projection) drawSegment(img draw.Image, s *ik.Segment, col color.RGBA) {
+  p.line(img, s.Start(), s.End(), col)
+  p.cross(img, s.End(), black)
 
   if s.Child != nil {
-    p.drawSegment(s.Child, col)
+    p.drawSegment(img, s.Child, col)
   }
 }
 
 // Cross draws a cross on the canvas, at the specified world coordinates.
-func (p *Projection) cross(wx float64, wy float64, col color.RGBA) {
-  cx, cy := p.project(wx, wy)
+func (p *Projection) cross(img draw.Image, v ik.Vector3, col color.RGBA) {
+  cx, cy := p.project(v)
 
-  c := draw2d.NewGraphicContext(p.img)
+  c := draw2d.NewGraphicContext(img)
   c.SetStrokeColor(col)
   c.SetLineWidth(1)
   size := 2.0
@@ -107,11 +234,11 @@ func (p *Projection) cross(wx float64, wy float64, col color.RGBA) {
 }
 
 // Line draws a line on the canvas, between the specified world coordinates.
-func (p *Projection) line(w1x float64, w1y float64, w2x float64, w2y float64, col color.RGBA) {
-  c1x, c1y := p.project(w1x, w1y)
-  c2x, c2y := p.project(w2x, w2y)
+func (p *Projection) line(img draw.Image, v1 ik.Vector3, v2 ik.Vector3, col color.RGBA) {
+  c1x, c1y := p.project(v1)
+  c2x, c2y := p.project(v2)
 
-  c := draw2d.NewGraphicContext(p.img)
+  c := draw2d.NewGraphicContext(img)
   c.SetStrokeColor(col)
   c.SetLineWidth(1)
 
@@ -120,42 +247,37 @@ func (p *Projection) line(w1x float64, w1y float64, w2x float64, w2y float64, co
   c.Stroke()
 }
 
-// Grid renders a grid onto the canvas.
-func (p *Projection) grid(xInterval float64, yInterval float64) {
-  l := draw2d.NewGraphicContext(p.img)
-  l.SetStrokeColor(color.RGBA{0xEE, 0xEE, 0xEE, 0xFF})
-  l.SetLineWidth(0.5)
+// Grid renders a grid onto the specified projection.
+func (p *Projection) grid(img draw.Image, interval float64, col color.RGBA) {
+  for x := (-p.worldWidth * 0.5) + interval; x < (p.worldWidth * 0.5); x += interval {
+    for y := (-p.worldHeight * 0.5) + interval; y < (p.worldHeight * 0.5); y += interval {
+      v := ik.Vector3{0, 0, 0}
 
-  xCount := p.worldWidth / xInterval
-  yCount := p.worldHeight / yInterval
+      switch p.horizAxis {
+      case X:
+        v.X = x
+      case Y:
+        v.Y = x
+      case Z:
+        v.Z = x
+      default:
+        panic("invalid horizAxis")
+      }
 
-  // horizontal lines
-  for x := 1.0; x < xCount; x += 1 {
-    xx, _ := p.project((x - (xCount / 2)) * xInterval, 0)
-    l.MoveTo(xx, 0)
-    l.LineTo(xx, p.canvasHeight)
-    l.Stroke()
+      switch p.vertiAxis {
+      case X:
+        v.X = y
+      case Y:
+        v.Y = y
+      case Z:
+        v.Z = y
+      default:
+        panic("invalid vertiAxis")
+      }
+
+      p.cross(img, v, col)
+    }
   }
-
-  // vertical lines
-  for y := 1.0; y < yCount; y += 1 {
-    _, yy := p.project(0, (y - (yCount / 2)) * yInterval)
-    l.MoveTo(0, yy)
-    l.LineTo(p.canvasWidth, yy)
-    l.Stroke()
-  }
-
-    l.SetStrokeColor(color.RGBA{0xAA, 0xAA, 0xAA, 0xFF})
-
-    // horiz axis
-  l.MoveTo(p.canvasWidth/2, 0)
-  l.LineTo(p.canvasWidth/2, p.canvasHeight)
-  l.Stroke()
-
-  // vert axis
-  l.MoveTo(0, p.canvasHeight/2)
-  l.LineTo(p.canvasWidth, p.canvasHeight/2)
-  l.Stroke()
 }
 
 func write(img draw.Image, path string) {
