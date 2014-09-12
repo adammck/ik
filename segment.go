@@ -2,6 +2,7 @@ package ik
 
 import (
 	"math"
+	"fmt"
 )
 
 type Segment struct {
@@ -26,6 +27,20 @@ func MakeSegment(parent *Segment, eaStart EulerAngles, eaEnd EulerAngles, vec Ve
 func MakeRootSegment(vec Vector3) *Segment {
 	return MakeSegment(nil, IdentityOrientation, IdentityOrientation, vec)
 }
+
+func (s Segment) String() string {
+	var childStr string
+
+	if s.Child != nil {
+		childStr = s.Child.String()
+	} else {
+		childStr = "nil"
+	}
+
+	return fmt.Sprintf("&Seg{%s %s}", s.angle, childStr)
+}
+
+
 
 func (s *Segment) Clone() *Segment {
 
