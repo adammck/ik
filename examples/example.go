@@ -62,18 +62,35 @@ func main() {
   target := ik.MakeVector3(*tx, *ty, *tz)
   fmt.Printf("target: %v\n", target)
 
+  // ----------------------------
+
   // The position of the object in space must be specified by two segments. The
   // first positions it, then the second (which is always zero-length) rotates
   // it into the home orientation.
-  r1 := ik.MakeRootSegment(*ik.MakeVector3(10, 0, 10))
-  r2 := ik.MakeSegment(r1, ik.Euler(0, 0, 0), ik.Euler(0, 0, 0), *ik.MakeVector3(0, 0, 0)) // -60 0 0
+  // r1 := ik.MakeRootSegment(*ik.MakeVector3(10, 0, 10))
+  // r2 := ik.MakeSegment(r1, ik.Euler(0, 0, 0), ik.Euler(0, 0, 0), *ik.MakeVector3(0, 0, 0)) // -60 0 0
 
-  // Movable segments
-  coxa   := ik.MakeSegment(r2,    ik.Euler(60, 0,   0), ik.Euler(-60, 0,    0), *ik.MakeVector3( 5, -5, 0)) // 0 0 0
-  femur  := ik.MakeSegment(coxa,  ik.Euler(0,  0,  90), ik.Euler(  0, 0,    0), *ik.MakeVector3(10,  0, 0)) // 0 0 60
-  tibia  := ik.MakeSegment(femur, ik.Euler(0,  0, -45), ik.Euler(  0, 0, -135), *ik.MakeVector3(10,  0, 0)) // 0 0 -90
-  tarsus := ik.MakeSegment(tibia, ik.Euler(0,  0,   0), ik.Euler(  0, 0,  -90), *ik.MakeVector3( 5,  0, 0)) // 0 0 -60
-  _ = tarsus
+  // // Movable segments
+  // coxa   := ik.MakeSegment(r2,    ik.Euler(60, 0,   0), ik.Euler(-60, 0,    0), *ik.MakeVector3( 5, -5, 0)) // 0 0 0
+  // femur  := ik.MakeSegment(coxa,  ik.Euler(0,  0,  90), ik.Euler(  0, 0,    0), *ik.MakeVector3(10,  0, 0)) // 0 0 60
+  // tibia  := ik.MakeSegment(femur, ik.Euler(0,  0, -45), ik.Euler(  0, 0, -135), *ik.MakeVector3(10,  0, 0)) // 0 0 -90
+  // tarsus := ik.MakeSegment(tibia, ik.Euler(0,  0,   0), ik.Euler(  0, 0,  -90), *ik.MakeVector3( 5,  0, 0)) // 0 0 -60
+
+  // ----------------------------
+
+  // The position of the object in space must be specified by two segments. The
+  // first positions it, then the second (which is always zero-length) rotates
+  // it into the home orientation.
+  r1 := ik.MakeRootSegment(*ik.MakeVector3(66, -40, 0))
+  r2 := ik.MakeSegment("r2", r1, ik.Euler(0, 0, 0), ik.Euler(0, 0, 0), *ik.MakeVector3(0, 0, 0))
+
+  // Movable segments (angles in deg, vectors in mm)
+  coxa   := ik.MakeSegment("coxa",   r2,     ik.Euler(40, 0,   0), ik.Euler(-40, 0,    0), *ik.MakeVector3(39,  9, -21))
+  femur  := ik.MakeSegment("femur",  coxa,   ik.Euler(0,  0,  90), ik.Euler(  0, 0,    0), *ik.MakeVector3(100, 0,   0))
+  tibia  := ik.MakeSegment("tibia",  femur,  ik.Euler(0,  0, -45), ik.Euler(  0, 0, -135), *ik.MakeVector3(85,  0,   0))
+  tarsus := ik.MakeSegment("tarsus", tibia,  ik.Euler(0,  0,   0), ik.Euler(  0, 0,  -90), *ik.MakeVector3(64,  0,  21))
+
+  // ----------------------------
 
   img := image.NewRGBA(image.Rect(0, 0, 1000, 1000))
   draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
@@ -86,8 +103,8 @@ func main() {
     offsetTop:    0,
     canvasWidth:  500,
     canvasHeight: 500,
-    worldWidth:   100.0,
-    worldHeight:  100.0,
+    worldWidth:   1000.0,
+    worldHeight:  1000.0,
   }
 
   front := &Projection{
@@ -98,8 +115,8 @@ func main() {
     offsetTop:    500,
     canvasWidth:  500,
     canvasHeight: 500,
-    worldWidth:   100.0,
-    worldHeight:  100.0,
+    worldWidth:   1000.0,
+    worldHeight:  1000.0,
   }
 
   side := &Projection{
@@ -110,18 +127,19 @@ func main() {
     offsetTop:    500,
     canvasWidth:  500,
     canvasHeight: 500,
-    worldWidth:   100.0,
-    worldHeight:  100.0,
+    worldWidth:   1000.0,
+    worldHeight:  1000.0,
   }
 
   p := &ProjectionSet{img, []*Projection{top, front, side}}
-  p.drawGrids(lightGrey, 5)
+  p.drawGrids(lightGrey, 20)
   p.drawLabels(black)
   p.drawSplits(black)
 
-  best := ik.Solve(coxa, target, 0.1, func(v ik.Vector3, d float64) {
-    p.cross(v, grey)
-  })
+  // best := ik.Solve(coxa, tarsus, target, 0.1, func(v ik.Vector3, d float64) {
+  //   p.cross(v, grey)
+  // })
+  best := ik.Solve(coxa, tarsus, target, 0.1)
 
   fmt.Printf("\n\n\n\ndistance: %0.4f\n", best.Distance)
   fmt.Printf("segment: %s\n", best.Segment)

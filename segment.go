@@ -1,21 +1,36 @@
 package ik
 
 import (
-	"math"
 	"fmt"
 )
 
 type Segment struct {
-	parent  *Segment
-	Child   *Segment
-	angle   EulerAngles
-	eaStart EulerAngles
-	eaEnd   EulerAngles
-	vec     Vector3
+	Name     string
+	parent   *Segment
+	Child    *Segment
+	Pair     Pair
+	Angle    EulerAngles
+	//eaStart  EulerAngles
+	//eaEnd    EulerAngles
+	vec      Vector3
+	locked   bool
+	eaLock   EulerAngles
 }
 
-func MakeSegment(parent *Segment, eaStart EulerAngles, eaEnd EulerAngles, vec Vector3) *Segment {
-	s := &Segment{parent, nil, eaStart, eaStart, eaEnd, vec}
+func MakeSegment(name string, parent *Segment, pair Pair, vec Vector3) *Segment {
+
+	//eaStart := pair.one
+	//eaEnd := pair.two
+
+	s := &Segment{
+		Name:    name,
+		parent:  parent,
+		Pair:    pair,
+		Angle:   pair.one,
+		//eaStart: eaStart,
+		//eaEnd:   eaEnd,
+		vec:     vec,
+	}
 
 	if parent != nil {
 		parent.Child = s
@@ -25,7 +40,7 @@ func MakeSegment(parent *Segment, eaStart EulerAngles, eaEnd EulerAngles, vec Ve
 }
 
 func MakeRootSegment(vec Vector3) *Segment {
-	return MakeSegment(nil, IdentityOrientation, IdentityOrientation, vec)
+	return MakeSegment("root", nil, Pair{}, vec)
 }
 
 func (s Segment) String() string {
@@ -37,7 +52,7 @@ func (s Segment) String() string {
 		childStr = "nil"
 	}
 
-	return fmt.Sprintf("&Seg{%s %s}", s.angle, childStr)
+	return fmt.Sprintf("&Seg{%s: %s %s}", s.Name, s.Angle, childStr)
 }
 
 
@@ -50,12 +65,14 @@ func (s *Segment) Clone() *Segment {
 	}
 
 	ss := &Segment{
+		Name:    s.Name,
 		parent:  s.parent,
 		Child:   c,
-		angle:   s.angle,
-		eaStart: s.eaStart,
-		eaEnd:   s.eaEnd,
+		Pair:    s.Pair,
+		Angle:   s.Angle,
 		vec:     s.vec,
+		locked:  s.locked,
+		eaLock:  s.eaLock,
 	}
 
 	if c != nil {
@@ -65,34 +82,38 @@ func (s *Segment) Clone() *Segment {
 	return ss
 }
 
-func (s *Segment) Focus() []*EulerAngles {
-	return nil
-}
-
-func (s *Segment) Range(step float64) []EulerAngles {
-	ea := make([]EulerAngles, 0)
-
-	minX := math.Min(s.eaStart.Heading, s.eaEnd.Heading)
-	maxX := math.Max(s.eaStart.Heading, s.eaEnd.Heading)
-	minY := math.Min(s.eaStart.Pitch, s.eaEnd.Pitch)
-	maxY := math.Max(s.eaStart.Pitch, s.eaEnd.Pitch)
-	minZ := math.Min(s.eaStart.Bank, s.eaEnd.Bank)
-	maxZ := math.Max(s.eaStart.Bank, s.eaEnd.Bank)
-
-	for x := minX; x <= maxX; x += step {
-		for y := minY; y <= maxY; y += step {
-			for z := minZ; z <= maxZ; z += step {
-				ea = append(ea, *MakeEulerAngles(x, y, z))
-			}
-		}
+func (s *Segment) EulerAngles(resolution float64) []EulerAngles {
+	if s.locked {
+		return []EulerAngles{s.eaLock}
 	}
 
-	return ea
+	return s.Pair.EulerAngles(resolution)
+}
+
+
+
+// func (s *Segment) Range(step float64) []EulerAngles {
+//   if(s.locked) {
+//     ea = append(ea, s.eaLock)
+//     return ea
+//   }
+// }
+
+func (s *Segment) LockRotation(ea EulerAngles) {
+	s.Angle = ea
+	s.eaLock = ea
+	s.locked = true
+}
+
+func (s *Segment) Unlock() {
+	s.Angle = IdentityOrientation
+	s.eaLock = IdentityOrientation
+	s.locked = false
 }
 
 // TODO: GTFO, do this in range, don't mutate it from outside.
 func (s *Segment) SetRotation(r EulerAngles) {
-	s.angle = r
+	s.Angle = r
 }
 
 // Start returns a vector3 with the coordinates of the start of this segment, in
@@ -115,13 +136,13 @@ func (s *Segment) WorldMatrix() *Matrix44 {
 	// that space, move by the vector (to the end of the segment), and rotate into
 	// this coordinate space.
 	if s.parent != nil {
-		m := MakeMatrix44(s.parent.vec, s.angle)
+		m := MakeMatrix44(s.parent.vec, s.Angle)
 		return MultiplyMatrices(*m, *s.parent.WorldMatrix())
 
 		// no parent means that this is a root segment, so the origin is zero, and
 		// transformations only need an angle.
 	} else {
-		return MakeMatrix44(ZeroVector3, s.angle)
+		return MakeMatrix44(ZeroVector3, s.Angle)
 	}
 }
 
